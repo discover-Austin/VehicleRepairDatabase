@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car to Car Mechanic - Repair Procedure Database</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header h1 {
+            margin-bottom: 5px;
+            font-size: 28px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            color: #ccc;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .search-section {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        
+        .search-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .input-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #555;
+        }
+        
+        .input-group input,
+        .input-group select {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #1a1a1a;
+        }
+        
+        .search-button {
+            align-self: flex-end;
+            padding: 12px 30px;
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .search-button:hover {
+            background: #333;
+        }
+        
+        .search-button:active {
+            transform: scale(0.98);
+        }
+        
+        .quick-searches {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .quick-searches label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #555;
+        }
+        
+        .quick-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .quick-button {
+            padding: 8px 14px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .quick-button:hover {
+            background: #e0e0e0;
+            border-color: #999;
+        }
+        
+        .results-section {
+            display: none;
+        }
+        
+        .results-section.active {
+            display: block;
+        }
+        
+        .procedure-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        
+        .procedure-header {
+            border-bottom: 3px solid #1a1a1a;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .procedure-header h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .procedure-header p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .procedure-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .meta-label {
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        
+        .meta-value {
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .tools-list, .parts-list, .safety-list, .notes-list {
+            list-style: none;
+        }
+        
+        .tools-list li, .parts-list li, .safety-list li, .notes-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .tools-list li:before {
+            content: "🔧";
+            position: absolute;
+            left: 0;
+        }
+        
+        .parts-list li:before {
+            content: "⚙️";
+            position: absolute;
+            left: 0;
+        }
+        
+        .safety-list li:before {
+            content: "⚠️";
+            position: absolute;
+            left: 0;
+        }
+        
+        .notes-list li:before {
+            content: "📝";
+            position: absolute;
+            left: 0;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            background: #1a1a1a;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-weight: 700;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .steps-list {
+            list-style: none;
+        }
+        
+        .steps-list li {
+            display: flex;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #333;
+        }
+        
+        .steps-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .torque-spec {
+            background: #f9f9f9;
+            padding: 12px;
+            border-left: 3px solid #1a1a1a;
+            margin: 10px 0;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            color: #333;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .note-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .print-button {
+            background: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 25px;
+            transition: background 0.3s;
+        }
+        
+        .print-button:hover {
+            background: #218838;
+        }
+        
+        .no-results {
+            background: white;
+            padding: 40px;
+            text-align: center;
+            border-radius: 8px;
+            color: #666;
+        }
+        
+        .no-results h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .header, .search-section, .print-button {
+                display: none;
+            }
+            
+            .procedure-container {
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
+            
+            .procedure-container {
+                break-inside: avoid;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .search-inputs {
+                grid-template-columns: 1fr;
+            }
+            
+            .procedure-meta {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Car to Car Mechanic</h1>
+        <p>Repair Procedure Database - 2020 & Up Vehicles</p>
+    </div>
+    
+    <div class="container">
+        <div class="search-section">
+            <div class="search-inputs">
+                <div class="input-group">
+                    <label>Repair Type</label>
+                    <input type="text" id="repairInput" placeholder="e.g., Head Gasket Replacement">
+                </div>
+                <div class="input-group">
+                    <label>Year</label>
+                    <input type="text" id="yearInput" placeholder="e.g., 2021">
+                </div>
+                <div class="input-group">
+                    <label>Make/Model</label>
+                    <input type="text" id="vehicleInput" placeholder="e.g., Dodge Charger">
+                </div>
+                <button class="search-button" onclick="searchProcedure()">SEARCH</button>
+            </div>
+            
+            <div class="quick-searches">
+                <label>Quick Searches:</label>
+                <div class="quick-buttons">
+                    <button class="quick-button" onclick="quickSearch('Head Gasket Replacement', '2021', 'Dodge Charger')">Head Gasket - 2021 Dodge Charger</button>
+                    <button class="quick-button" onclick="quickSearch('Water Pump Replacement', '2020', 'Ford F-150')">Water Pump - 2020 Ford F-150</button>
+                    <button class="quick-button" onclick="quickSearch('Spark Plug Replacement', '2022', 'Honda Civic')">Spark Plugs - 2022 Honda Civic</button>
+                    <button class="quick-button" onclick="quickSearch('Alternator Replacement', '2023', 'Toyota Camry')">Alternator - 2023 Toyota Camry</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results-section" id="resultsSection">
+            <button class="print-button" onclick="window.print()">🖨️ PRINT PROCEDURE</button>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const procedures = {
+            "head gasket replacement|2021|dodge charger": {
+                repair: "Head Gasket Replacement",
+                vehicle: "2021 Dodge Charger",
+                year: 2021,
+                make: "Dodge",
+                model: "Charger",
+                estimatedTime: "8-12 hours",
+                difficulty: "Advanced",
+                estimatedCost: "$450-650 (parts) + labor",
+                tools: [
+                    "Socket set (metric and standard)",
+                    "Torque wrench (0-150 ft-lbs)",
+                    "Gasket scraper tool",
+                    "Clean cloth/towels",
+                    "Engine hoist (recommended)",
+                    "Jack stands",
+                    "Drain pan",
+                    "Compression tester",
+                    "Coolant flush kit",
+                    "Torque angle gauge (for angle-tightening)"
+                ],
+                parts: [
+                    "Head gasket kit (complete)",
+                    "Cylinder head bolts (OEM recommended)",
+                    "Valve cover gasket",
+                    "Intake manifold gasket",
+                    "Exhaust manifold gasket",
+                    "Coolant (5 gallons minimum)",
+                    "Engine oil (8 quarts)",
+                    "Oil filter"
+                ],
+                safetyNotes: [
+                    "Engine must be completely cool before beginning work",
+                    "Disconnect negative battery terminal first",
+                    "Support engine properly - improper support causes serious injury",
+                    "Wear safety glasses and gloves throughout procedure",
+                    "Do not work under engine without proper jack stands",
+                    "Allow minimum 4 hours cool-down time after hot engine work",
+                    "High-pressure coolant systems - release pressure slowly"
+                ],
+                notes: [
+                    "This is a major repair requiring engine removal on this model",
+                    "OEM head gaskets must be used - aftermarket may fail prematurely",
+                    "Head bolts are torque-to-yield and must be replaced",
+                    "Check cylinder head for warping before reassembly",
+                    "Reset service light after completion",
+                    "Road test required before returning to customer"
+                ],
+                steps: [
+                    {
+                        title: "Disconnect Battery and Drain Systems",
+                        details: "Disconnect negative battery terminal. Drain coolant into clean pan (catch and measure). Drain engine oil into separate pan. Remove battery from vehicle to create working space. Remove intake manifold cover."
+                    },
+                    {
+                        title: "Remove Accessories and Manifolds",
+                        details: "Remove serpentine belt and tensioner. Disconnect radiator hoses at engine. Unbolt alternator and AC compressor without disconnecting hoses (hang aside). Remove upper intake manifold with gasket. Remove valve covers. Document all electrical connections with photos before disconnection."
+                    },
+                    {
+                        title: "Remove Engine-to-Frame Mounts",
+                        details: "Support engine with hydraulic jack and wood block under oil pan. Place jack stands for safety backup. Remove engine mounts on both sides. Lift engine slightly (2-3 inches) to clear frame rails. This provides access to cylinder head bolts."
+                    },
+                    {
+                        title: "Remove Cylinder Head Bolts",
+                        details: "Loosen bolts in reverse order of tightening sequence (see diagram). Use a progressive loosening pattern - loosen 1/4 turn on all bolts, then 1/2 turn, then full removal. This prevents head warping. Mark bolt positions with marker if reusing. On this model, bolts MUST be replaced with OEM parts."
+                    },
+                    {
+                        title: "Remove Cylinder Head",
+                        details: "Carefully lift cylinder head from engine block. It is heavy (approximately 80 lbs) - use helper. Place on clean surface. Do not set on gasket surface. Remove old gasket completely and scrape surface clean. Use gasket scraper tool - do not use wire brush which damages surface. Clean oil passages."
+                    },
+                    {
+                        title: "Inspect Cylinder Head and Block",
+                        details: "Inspect cylinder head for cracks using visual inspection and dye penetrant if cracks suspected. Measure head surface with straightedge in multiple directions. Maximum warping: 0.003\" on this model. If warpage exceeds limit, head must be resurfaced professionally or replaced. Check all bolt holes - clean with compressed air. Remove any debris from oil galleries."
+                    },
+                    {
+                        title: "Prepare and Install New Gasket",
+                        details: "Clean cylinder block gasket surface with brake cleaner and lint-free cloth. Allow 10 minutes for solvent to fully evaporate - no residue must remain. Remove new gasket from package (do not touch gasket surfaces). Carefully place gasket on block - position markers on gasket must align with engine orientation. Gasket is directional on this model."
+                    },
+                    {
+                        title: "Install Cylinder Head",
+                        details: "Carefully lower cylinder head onto gasket with helper. Guide head straight down - do not slide or twist. Ensure gasket stays in position. Hand-thread all bolts to start - this prevents cross-threading. Do not force any bolt. Sequence: tighten bolts in circular pattern from center outward."
+                    },
+                    {
+                        title: "Torque Cylinder Head Bolts - Phase 1",
+                        details: "This model uses torque-to-yield specification. Phase 1: Tighten all bolts to 22 ft-lbs in sequence pattern (center to outer). Recheck all bolts at 22 ft-lbs after complete sequence. Verify no bolt is skipped. Use calibrated torque wrench - verify calibration before beginning."
+                    },
+                    {
+                        title: "Torque Cylinder Head Bolts - Phase 2",
+                        details: "Phase 2: Tighten all bolts to 45 ft-lbs in same sequence pattern. Work methodically - do not rush this step. Verify each bolt reaches exactly 45 ft-lbs. If a bolt reaches more/less than 5 ft-lbs of its neighbors, verify torque wrench calibration and recheck."
+                    },
+                    {
+                        title: "Torque Cylinder Head Bolts - Phase 3 (Angle Tightening)",
+                        details: "Phase 3: Using torque angle gauge, rotate each bolt exactly 90 degrees (1/4 turn) in sequence. Bolts will increase tension significantly. Do not exceed 90 degrees - this can break bolts. Verify all bolts complete 90 degree rotation. This method stretches bolts to create proper clamping force for modern engines."
+                    },
+                    {
+                        title: "Install Gaskets and Manifolds",
+                        details: "Install new valve cover gaskets with gasket sealant on corners. Torque valve cover bolts to 8 ft-lbs in star pattern. Install intake manifold with new gasket and torque bolts to 22 ft-lbs. Install exhaust manifold with new gasket and torque bolts to 33 ft-lbs. Verify all fasteners seated properly."
+                    },
+                    {
+                        title: "Reinstall Engine Accessories",
+                        details: "Reconnect all electrical connections (verify with photos from disassembly). Install alternator and torque to 45 ft-lbs. Install AC compressor and torque to 20 ft-lbs. Install serpentine belt on proper routing (check diagram on radiator shroud). Tension should flex 1/2\" under thumb pressure. Install battery and battery negative terminal last."
+                    },
+                    {
+                        title: "Lower Engine and Install Mounts",
+                        details: "Lower engine back to normal position using jack. Install engine mounts - torque to 45 ft-lbs on this model. Remove jack and jack stands. Verify engine is seated properly with no binding or unusual gaps. Check clearances around engine - no hoses kinked or rubbing."
+                    },
+                    {
+                        title: "Refill Coolant and Oil",
+                        details: "Install drain plug with new crush washer - torque to 20 ft-lbs. Refill with 8 quarts of OEM-specified oil. Start engine and let idle 30 seconds. Shut down and allow to settle 2 minutes. Check oil level - top if needed. Refill coolant with 50/50 mix - fill to proper level mark. Install radiator cap when cool."
+                    },
+                    {
+                        title: "System Flush and Air Removal",
+                        details: "Connect radiator hoses - torque hose clamps to 18 ft-lbs (do not over-tighten - crushes hoses). Open heater control to maximum heat. Start engine and let idle until coolant fan cycles twice. This purges air from system. Watch temperature gauge - should reach normal operating temp. If temperature climbs beyond normal, immediately shut down - indicates air lock."
+                    },
+                    {
+                        title: "Pressure Test and Final Check",
+                        details: "Allow engine to cool completely (minimum 4 hours). Install coolant pressure cap and perform pressure test at 15 PSI. Check entire cooling system for leaks - pay special attention to head gasket line (at parting surfaces). No leaks acceptable. Test heater operation on both temperatures. Check all drain points for leaks. Check oil pressure light goes off immediately upon start."
+                    },
+                    {
+                        title: "Road Test and Final Verification",
+                        details: "Road test vehicle for minimum 20 minutes including highway speeds. Monitor temperature gauge - must remain in normal range. No steam or unusual smells should occur. Check for rough idle or misfire - indicates improper cylinder head bolt torque. Listen for abnormal valve train noise. Return to shop and allow cool-down. Perform final check for any leaks. Reset service light. Document all work with photos."
+                    }
+                ]
+            },
+            
+            "water pump replacement|2020|ford f-150": {
+                repair: "Water Pump Replacement",
+                vehicle: "2020 Ford F-150",
+                year: 2020,
+                make: "Ford",
+                model: "F-150",
+                estimatedTime: "3-5 hours",
+                difficulty: "Intermediate",
+                estimatedCost: "$200-300 (parts) + labor",
+                tools: [
+                    "Socket set (metric and standard)",
+                    "Torque wrench (0-100 ft-lbs)",
+                    "Pulley tool/holding fixture",
+                    "Jack and jack stands",
+                    "Drain pan",
+                    "Coolant flush kit",
+                    "Belt tension tool"
+                ],
+                parts: [
+                    "Water pump assembly (OEM preferred)",
+                    "Gasket set",
+                    "Timing belt (if engine-dependent)",
+                    "Coolant (2-3 gallons)",
+                    "Thermostat housing gasket"
+                ],
+                safetyNotes: [
+                    "Engine must be completely cool - hot coolant causes severe burns",
+                    "Never open radiator cap on hot engine",
+                    "Dispose of coolant properly - it is toxic",
+                    "Support vehicle properly on jack stands",
+                    "Disconnect negative battery terminal before starting"
+                ],
+                notes: [
+                    "This procedure varies by engine type (EcoBoost vs V8)",
+                    "Some models require timing cover removal",
+                    "Use OEM coolant only - mixing types causes precipitation",
+                    "Verify water pump bolt length before installation"
+                ],
+                steps: [
+                    {
+                        title: "Preparation and Coolant Drain",
+                        details: "Allow engine to cool completely. Disconnect negative battery terminal. Remove plastic splash shield under truck. Place drain pan under radiator drain cock. Open radiator drain and allow coolant to drain completely. Open heater drain valve. Measure coolant volume drained for reference."
+                    },
+                    {
+                        title: "Remove Serpentine Belt",
+                        details: "Locate belt tensioner (usually on right side of engine). Insert 3/8\" wrench or socket in hole provided. Rotate tensioner clockwise (rotate away from engine) to release tension. Slide serpentine belt off pulleys. Mark belt routing with marker if reusing (check radiator shroud diagram). Remove belt fully and set aside."
+                    },
+                    {
+                        title: "Remove Water Pump Pulley",
+                        details: "Insert pulley holding tool into bolt pattern or use strap wrench to hold pulley stationary. Unbolt pulley bolts (typically 3-4 bolts, 15 ft-lbs) with socket wrench. Remove pulley - be careful not to drop. Set bolts aside on marked surface (bolt lengths vary on this model)."
+                    },
+                    {
+                        title: "Remove Water Pump Mounting Bolts",
+                        details: "Unbolt water pump from engine block. Bolt count varies (typically 4-5 bolts). Work methodically around pump - do not over-tighten socket to avoid stripping bolts. Some bolts have different lengths - mark positions. Remove pump carefully - do not jolt or twist."
+                    },
+                    {
+                        title: "Remove Old Gasket and Clean Surfaces",
+                        details: "Scrape old gasket completely from engine block using gasket scraper. Do not use wire brush - damages aluminum. Use brake cleaner and lint-free cloth. Allow 5 minutes for cleaner to evaporate. Surface must be completely clean and dry. Check surface for damage - cracks require machining shop visit."
+                    },
+                    {
+                        title: "Inspect Mounting Surface",
+                        details: "Use straightedge to check mounting surface flatness. Maximum acceptable warpage: 0.005\". If exceeds limit, surface must be machined or water pump will leak. Inspect bolt holes - verify all are clean and threads intact. Compressed air through passages to remove debris."
+                    },
+                    {
+                        title: "Install New Water Pump with Gasket",
+                        details: "Apply gasket sealant to new gasket at corners (do not apply across entire gasket). Position gasket on pump inlet port - align with mounting bolt holes. Carefully position pump assembly on engine block. Hand-thread bolts first to prevent cross-threading and gasket misalignment. Do not force bolts."
+                    },
+                    {
+                        title: "Torque Water Pump Mounting Bolts",
+                        details: "Torque bolts in criss-cross pattern (opposite sides alternately) to avoid warping pump body. Correct torque: 18-22 ft-lbs on this model. After complete sequence, recheck all bolts - verify no bolt less than 16 ft-lbs or more than 24 ft-lbs. Verify pump is not binding on block."
+                    },
+                    {
+                        title: "Install Water Pump Pulley",
+                        details: "Position pulley on pump shaft. Install bolts - use pulley holding tool or strap wrench to prevent rotation. Torque to 15 ft-lbs in alternating pattern. Verify pulley is tight - attempt to move with hand - should not move. Spin pulley by hand to verify free rotation with no binding."
+                    },
+                    {
+                        title: "Reinstall Serpentine Belt",
+                        details: "Route belt following diagram on radiator shroud or intake manifold. Insert wrench in tensioner access hole and rotate away from engine to create slack. Slide belt onto all pulleys - water pump pulley, alternator pulley, crankshaft pulley, AC compressor, power steering pump (as applicable). Verify belt is seated in all pulley grooves."
+                    },
+                    {
+                        title: "Tension Serpentine Belt",
+                        details: "Release tensioner slowly - it will draw belt tight automatically. Verify belt tension by pressing on belt midway between pulleys - should deflect 1/2\" under firm thumb pressure. Visually inspect - belt should track straight on all pulleys with no runout. Spin engine by hand (via crankshaft bolt) - verify belt rotates smoothly."
+                    },
+                    {
+                        title: "Refill Coolant System",
+                        details: "Pour coolant 50/50 mix into radiator to proper fill line. Pour into surge tank to fill mark. Close radiator drain cock (torque 10 ft-lbs). Close heater drain valve. Start engine with radiator cap OFF and watch coolant level - it will drop as system fills. Add coolant as needed to maintain level. Allow engine to warm."
+                    },
+                    {
+                        title: "Bleed Air from Coolant System",
+                        details: "Set heater to maximum heat. Let engine idle until coolant fan cycles once. This purges air from system. Watch coolant level - add as needed. Turn off engine and allow to cool 15 minutes. Recheck level - should be at fill mark when cool. If level drops more than 1/2\" after cooling, air remains in system - repeat heating cycle."
+                    },
+                    {
+                        title: "Final System Check and Leak Test",
+                        details: "Install coolant cap and pressurize system to 15 PSI with pressure tester. Inspect all connections, pump mounting, and hose connections for leaks. Special attention to water pump/block interface - any seepage is failure. Allow to sit under pressure 2 minutes minimum. No weeping acceptable. Release pressure slowly."
+                    },
+                    {
+                        title: "Road Test and Monitor",
+                        details: "Start engine cold and observe temperature gauge - should reach normal operating temperature within 5 minutes. No steam or smells should occur. Monitor temperature on 10-minute road test including highway speeds. Return to shop and inspect for any leaks after engine warms and cools. Document completion with photos."
+                    }
+                ]
+            },
+            
+            "spark plug replacement|2022|honda civic": {
+                repair: "Spark Plug Replacement",
+                vehicle: "2022 Honda Civic",
+                year: 2022,
+                make: "Honda",
+                model: "Civic",
+                estimatedTime: "1-2 hours",
+                difficulty: "Beginner",
+                estimatedCost: "$30-80 (parts) + labor",
+                tools: [
+                    "Spark plug socket (14mm)",
+                    "Ratchet and extension",
+                    "Spark plug gap tool",
+                    "Feeler gauge",
+                    "Socket set for coil pack removal"
+                ],
+                parts: [
+                    "Spark plugs (4x OEM Honda NGK) - Part number per vehicle"
+                ],
+                safetyNotes: [
+                    "Engine must be cool before removing coil packs",
+                    "Disconnect negative battery terminal first",
+                    "Do not pull on coil pack wires - grasp plastic connector body",
+                    "Do not cross-thread spark plugs"
+                ],
+                notes: [
+                    "Honda uses premium spark plugs - OEM required",
+                    "Gap setting must be precise - verify before installation",
+                    "Mark coil pack locations before removal - critical for reassembly",
+                    "Do not reuse old spark plugs"
+                ],
+                steps: [
+                    {
+                        title: "Disconnect Battery and Cool Engine",
+                        details: "Engine must be completely cool. Disconnect negative battery terminal. Wait 5 minutes for electrical discharge. Remove engine cover if present (clips on 2022 model)."
+                    },
+                    {
+                        title: "Locate and Remove Coil Packs",
+                        details: "Coil packs sit directly on top of spark plugs. Number the coils 1-4 from front to rear with marker on masking tape. This prevents cross-wiring. Disconnect electrical connector from coil pack 1 by pressing release button (do not pull wire). Remove mounting bolt (10mm socket). Pull coil pack straight up - may require gentle twisting. Repeat for coils 2, 3, 4."
+                    },
+                    {
+                        title: "Remove Old Spark Plugs",
+                        details: "Insert 14mm spark plug socket with extension on ratchet. Remove spark plug from cylinder 1 - turn wrench counterclockwise. As spark plug comes loose, slow down and remove by hand to prevent cross-threading. Remove slowly - do not jerk. Place old plugs on marked surface in order (cylinder 1, 2, 3, 4). Inspect old plugs for wear pattern."
+                    },
+                    {
+                        title: "Verify New Spark Plug Gap",
+                        details: "New plugs arrive pre-gapped to specification, but verify: 0.028-0.032\" (0.7-0.8mm) for this model. Use feeler gauge to measure. If adjustment needed, carefully bend ground electrode with small adjustment tool. Re-measure after each adjustment. Do not bend side electrode (center electrode). Verify four plugs before installation."
+                    },
+                    {
+                        title: "Install New Spark Plugs",
+                        details: "Hand-thread spark plug into hole to prevent cross-threading - it should screw in easily by hand. Once seated by hand, use spark plug socket and torque wrench. Correct torque: 18 ft-lbs on this model. Do not over-torque - breaks ceramic insulator. Install all four plugs in sequence: cylinder 1, 2, 3, 4."
+                    },
+                    {
+                        title: "Reinstall Coil Packs",
+                        details: "Position coil pack 1 onto spark plug and push down firmly until it seats completely. Install mounting bolt (10mm) - torque to 8 ft-lbs. Connect electrical connector firmly until it clicks. Repeat for coils 2, 3, 4 in sequence. Verify each coil clicks firmly into place - loose connections cause misfires."
+                    },
+                    {
+                        title: "Final Check and Reconnect Battery",
+                        details: "Visually inspect all coil packs - each should be fully seated and bolted. Verify electrical connectors are fully clicked. Reconnect battery negative terminal. Close engine cover. Start engine and listen - should start smoothly with no misfires. No check engine light should illuminate."
+                    },
+                    {
+                        title: "Test Drive and Verification",
+                        details: "Perform 10-minute test drive at various speeds. Engine should run smoothly with no hesitation or rough idle. No unusual sounds. Return to shop, allow cool-down, and perform visual final inspection. Document with photos."
+                    }
+                ]
+            },
+            
+            "alternator replacement|2023|toyota camry": {
+                repair: "Alternator Replacement",
+                vehicle: "2023 Toyota Camry",
+                year: 2023,
+                make: "Toyota",
+                model: "Camry",
+                estimatedTime: "2-3 hours",
+                difficulty: "Intermediate",
+                estimatedCost: "$300-450 (parts) + labor",
+                tools: [
+                    "Socket set (metric and standard)",
+                    "Torque wrench (0-100 ft-lbs)",
+                    "Jack and jack stands",
+                    "Amperage clamp meter (optional but recommended)"
+                ],
+                parts: [
+                    "Alternator assembly (OEM Toyota preferred)",
+                    "Battery (if battery tested bad during diagnostics)"
+                ],
+                safetyNotes: [
+                    "Disconnect negative battery terminal before starting",
+                    "Never work on electrical system with engine running",
+                    "Support vehicle properly - do not work under unsupported vehicle",
+                    "Wear safety glasses - serpentine belt can cause eye injury"
+                ],
+                notes: [
+                    "Output should be 130 amps on this model",
+                    "OEM alternator recommended - many aftermarket units fail prematurely",
+                    "Perform charging system test before and after replacement",
+                    "Clean battery terminals before installation"
+                ],
+                steps: [
+                    {
+                        title: "Disconnect Battery",
+                        details: "Disconnect negative battery terminal. Wait 5 minutes. This prevents electrical discharge and damage to vehicle electronics. Leave positive terminal connected."
+                    },
+                    {
+                        title: "Remove Serpentine Belt",
+                        details: "Locate belt tensioner (passenger side, near bottom of belt run). Insert wrench in tensioner adjustment hole. Rotate clockwise (toward engine) to release tension. Slide serpentine belt off pulleys. Mark routing path with marker on tape for reassembly reference."
+                    },
+                    {
+                        title: "Remove Alternator Electrical Connections",
+                        details: "Disconnect alternator field wire connector (press release tab and pull connector straight). Disconnect battery positive cable from alternator output stud - use 8mm wrench. Use heat shrink tube on connector to prevent corrosion. Mark connector location with tape for reassembly."
+                    },
+                    {
+                        title: "Remove Alternator Mounting Bolts",
+                        details: "Remove alternator mounting bracket bolts (10mm and 12mm sockets). Bolts have different lengths - mark positions. Alternator on this model has 2 upper mounting points and 1 lower. Work methodically to remove all bolts. Lower alternator carefully - check for hose interference."
+                    },
+                    {
+                        title: "Remove Old Alternator",
+                        details: "Slide alternator out from engine bay carefully. Do not hit surrounding hoses or belts. Set on clean surface. Inspect output stud for damage - replace if corroded. New alternator must have same amperage rating (130A on this model)."
+                    },
+                    {
+                        title: "Prepare New Alternator",
+                        details: "Verify new alternator is identical to removed unit - check part number, mounting points, and electrical connectors. Place new alternator in engine bay in correct position. Hand-align all mounting holes before tightening any bolts."
+                    },
+                    {
+                        title: "Install and Torque Mounting Bolts",
+                        details: "Install all mounting bolts finger-tight first. This ensures proper alignment. Then torque in sequence: upper bolts to 45 ft-lbs, lower bracket bolt to 25 ft-lbs. Use torque wrench - verify calibration. Do not over-torque - damages alternator housing."
+                    },
+                    {
+                        title: "Connect Electrical Connectors",
+                        details: "Connect field wire connector to alternator - push firmly until it clicks. Connect battery positive cable to output stud - torque to 8 ft-lbs using 8mm wrench. Verify connector is tight by attempting to wiggle - should not move. No exposed copper should be visible."
+                    },
+                    {
+                        title: "Reinstall Serpentine Belt",
+                        details: "Route serpentine belt following marked path (or diagram on radiator shroud). Wrap around alternator pulley. Ensure belt is fully seated in all pulley grooves. Rotate tensioner counterclockwise (away from engine) with wrench to create slack. Slide belt into final position. Release tensioner slowly - belt will self-tighten."
+                    },
+                    {
+                        title: "Verify Belt Tension",
+                        details: "Check belt tension by pressing firmly at midway point between alternator and crankshaft pulley. Should deflect approximately 1/2\" under moderate pressure. Spin engine by hand via crankshaft bolt - belt should rotate smoothly with no binding. Visual inspection - belt should track straight on all pulleys."
+                    },
+                    {
+                        title: "Reconnect Battery",
+                        details: "Reconnect negative battery terminal firmly. Verify connection is tight. Do not over-tighten - can break terminal. Wait 30 seconds before starting engine - allows electrical system to stabilize."
+                    },
+                    {
+                        title: "Initial Start and Charging Test",
+                        details: "Start engine and listen for any unusual sounds (squealing indicates belt tension issue). Let idle for 1 minute. Attach voltmeter across battery - should read 13.5-14.5 volts. If below 13.5V, alternator may be defective. If above 14.5V, voltage regulator may be faulty. Disconnect voltmeter."
+                    },
+                    {
+                        title: "Load Test Alternator Output",
+                        details: "With engine running at 2000 RPM, turn on headlights, rear window defroster, and seat heaters simultaneously. Observe voltage - should remain 13.5-14.5V under load. If voltage drops below 13.0V, alternator output is low. Use clamp amperage meter on battery cable - output should be 80+ amps at 2000 RPM. This confirms alternator is functioning properly."
+                    },
+                    {
+                        title: "Road Test and Monitoring",
+                        details: "Perform 15-minute road test including highway speeds. Monitor dashboard - charging system light should not illuminate. Verify no flickering lights or battery warning indicators. On return to shop, allow engine to cool and perform final visual inspection for any leaks around alternator (no leaks acceptable)."
+                    }
+                ]
+            }
+        };
+
+        function searchProcedure() {
+            const repair = document.getElementById('repairInput').value.toLowerCase().trim();
+            const year = document.getElementById('yearInput').value.toLowerCase().trim();
+            const vehicle = document.getElementById('vehicleInput').value.toLowerCase().trim();
+            
+            if (!repair || !year || !vehicle) {
+                alert('Please enter all fields: Repair Type, Year, and Make/Model');
+                return;
+            }
+            
+            performSearch(repair, year, vehicle);
+        }
+        
+        function quickSearch(repair, year, vehicle) {
+            document.getElementById('repairInput').value = repair;
+            document.getElementById('yearInput').value = year;
+            document.getElementById('vehicleInput').value = vehicle;
+            performSearch(repair.toLowerCase(), year.toLowerCase(), vehicle.toLowerCase());
+        }
+        
+        function performSearch(repair, year, vehicle) {
+            const searchKey = `${repair}|${year}|${vehicle}`;
+            const procedure = procedures[searchKey];
+            const resultsSection = document.getElementById('resultsSection');
+            const resultContent = document.getElementById('resultContent');
+            
+            if (procedure) {
+                resultContent.innerHTML = generateProcedureHTML(procedure);
+                resultsSection.classList.add('active');
+                window.scrollTo(0, 0);
+            } else {
+                resultContent.innerHTML = `
+                    <div class="no-results">
+                        <h3>Procedure Not Found</h3>
+                        <p>The procedure for "${repair.toUpperCase()}" on a ${year} ${vehicle} is not in the database yet.</p>
+                        <p style="margin-top: 15px; font-size: 12px; color: #999;">Available procedures: Head Gasket (2021 Dodge Charger), Water Pump (2020 Ford F-150), Spark Plugs (2022 Honda Civic), Alternator (2023 Toyota Camry)</p>
+                    </div>
+                `;
+                resultsSection.classList.add('active');
+                window.scrollTo(0, 0);
+            }
+        }
+        
+        function generateProcedureHTML(proc) {
+            let html = `
+                <div class="procedure-container">
+                    <div class="procedure-header">
+                        <h2>${proc.repair}</h2>
+                        <p>${proc.year} ${proc.make} ${proc.model}</p>
+                        <div class="procedure-meta">
+                            <div class="meta-item">
+                                <div class="meta-label">Estimated Time</div>
+                                <div class="meta-value">${proc.estimatedTime}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Difficulty Level</div>
+                                <div class="meta-value">${proc.difficulty}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Estimated Cost</div>
+                                <div class="meta-value">${proc.estimatedCost}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Vehicle Mileage</div>
+                                <div class="meta-value">All Mileages</div>
+                            </div>
+                        </div>
+                    </div>
+            `;
+            
+            // Safety Notes
+            if (proc.safetyNotes && proc.safetyNotes.length > 0) {
+                html += `<div class="warning-box">
+                    <strong>⚠️ CRITICAL SAFETY NOTES:</strong>
+                    <ul class="safety-list">
+                        ${proc.safetyNotes.map(note => `<li>${note}</li>`).join('')}
+                    </ul>
+                </div>`;
+            }
+            
+            // Tools Section
+            html += `<div class="section">
+                <h3 class="section-title">Required Tools</h3>
+                <ul class="tools-list">
+                    ${proc.tools.map(tool => `<li>${tool}</li>`).join('')}
+                </ul>
+            </div>`;
+            
+            // Parts Section
+            html += `<div class="section">
+                <h3 class="section-title">Parts Required</h3>
+                <ul class="parts-list">
+                    ${proc.parts.map(part => `<li>${part}</li>`).join('')}
+                </ul>
+            </div>`;
+            
+            // Notes Section
+            if (proc.notes && proc.notes.length > 0) {
+                html += `<div class="note-box">
+                    <strong>📝 IMPORTANT NOTES:</strong>
+                    <ul class="notes-list">
+                        ${proc.notes.map(note => `<li>${note}</li>`).join('')}
+                    </ul>
+                </div>`;
+            }
+            
+            // Steps Section
+            html += `<div class="section">
+                <h3 class="section-title">Procedure Steps</h3>`;
+            
+            proc.steps.forEach((step, index) => {
+                html += `
+                    <ul class="steps-list">
+                        <li>
+                            <div class="step-number">${index + 1}</div>
+                            <div class="step-content">
+                                <strong>${step.title}</strong><br>
+                                ${step.details}
+                                ${step.torque ? `<div class="torque-spec">${step.torque}</div>` : ''}
+                            </div>
+                        </li>
+                    </ul>
+                `;
+            });
+            
+            html += `</div></div>`;
+            
+            return html;
+        }
+        
+        // Allow Enter key to search
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                searchProcedure();
+            }
+        });
+    </script>
+</body>
+</html>
+
