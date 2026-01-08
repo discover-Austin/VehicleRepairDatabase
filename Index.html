@@ -386,6 +386,17 @@
     
     <div class="container">
         <div class="search-section">
+            <!-- Natural Language Search -->
+            <div class="natural-search">
+                <label style="display: block; font-weight: 600; margin-bottom: 10px; font-size: 14px; text-transform: uppercase; color: #555;">Type Your Repair Query</label>
+                <div style="display: flex; gap: 15px;">
+                    <input type="text" id="naturalInput" placeholder="e.g., replace head gasket on a 2021 dodge charger" style="flex: 1; padding: 15px; border: 2px solid #1a1a1a; border-radius: 4px; font-size: 16px;">
+                    <button class="search-button" onclick="naturalSearch()" style="padding: 15px 40px; font-size: 16px;">SEARCH</button>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 20px 0; color: #999; font-size: 12px;">— OR USE SPECIFIC FIELDS —</div>
+
             <div class="search-inputs">
                 <div class="input-group">
                     <label>Repair Type</label>
@@ -420,6 +431,233 @@
     </div>
 
     <script>
+        // Smart search function to handle natural language queries
+        function smartSearch(query) {
+            query = query.toLowerCase().trim();
+
+            // Common repair term mappings (what users type -> what's in database)
+            const repairMappings = {
+                'head gasket': 'head gasket replacement',
+                'replace head gasket': 'head gasket replacement',
+                'blown head gasket': 'head gasket replacement',
+                'water pump': 'water pump replacement',
+                'replace water pump': 'water pump replacement',
+                'spark plug': 'spark plug replacement',
+                'spark plugs': 'spark plug replacement',
+                'replace spark plugs': 'spark plug replacement',
+                'change spark plugs': 'spark plug replacement',
+                'alternator': 'alternator replacement',
+                'replace alternator': 'alternator replacement',
+                'charging system': 'alternator replacement',
+                'brake pads': 'brake pad replacement',
+                'replace brake pads': 'brake pad replacement',
+                'front brakes': 'front brake pad replacement',
+                'rear brakes': 'rear brake pad replacement',
+                'brake rotors': 'brake rotor replacement',
+                'rotors': 'brake rotor replacement',
+                'timing belt': 'timing belt replacement',
+                'timing chain': 'timing chain replacement',
+                'oil pan gasket': 'oil pan gasket replacement',
+                'valve cover gasket': 'valve cover gasket replacement',
+                'valve cover': 'valve cover gasket replacement',
+                'struts': 'strut replacement',
+                'shocks': 'strut replacement',
+                'strut replacement': 'strut replacement',
+                'ball joint': 'ball joint replacement',
+                'ball joints': 'ball joint replacement',
+                'tie rod': 'tie rod end replacement',
+                'tie rods': 'tie rod end replacement',
+                'tie rod end': 'tie rod end replacement',
+                'control arm': 'control arm replacement',
+                'control arms': 'control arm replacement',
+                'starter': 'starter replacement',
+                'replace starter': 'starter replacement',
+                'starter motor': 'starter replacement',
+                'battery': 'battery replacement',
+                'replace battery': 'battery replacement',
+                'o2 sensor': 'oxygen sensor replacement',
+                'oxygen sensor': 'oxygen sensor replacement',
+                'radiator': 'radiator replacement',
+                'replace radiator': 'radiator replacement',
+                'thermostat': 'thermostat replacement',
+                'replace thermostat': 'thermostat replacement',
+                'coolant hose': 'coolant hose replacement',
+                'radiator hose': 'coolant hose replacement',
+                'fuel pump': 'fuel pump replacement',
+                'replace fuel pump': 'fuel pump replacement',
+                'fuel injector': 'fuel injector replacement',
+                'fuel injectors': 'fuel injector replacement',
+                'injectors': 'fuel injector replacement',
+                'fuel filter': 'fuel filter replacement',
+                'transmission fluid': 'transmission fluid change',
+                'trans fluid': 'transmission fluid change',
+                'atf': 'transmission fluid change',
+                'brake caliper': 'brake caliper replacement',
+                'caliper': 'brake caliper replacement',
+                'calipers': 'brake caliper replacement',
+                'wheel bearing': 'wheel bearing replacement',
+                'hub bearing': 'wheel bearing replacement',
+                'cv axle': 'cv axle replacement',
+                'axle': 'cv axle replacement',
+                'drive axle': 'cv axle replacement',
+                'serpentine belt': 'serpentine belt replacement',
+                'drive belt': 'serpentine belt replacement',
+                'belt': 'serpentine belt replacement',
+                'power steering pump': 'power steering pump replacement',
+                'power steering': 'power steering pump replacement',
+                'ac compressor': 'ac compressor replacement',
+                'air conditioning': 'ac compressor replacement',
+                'a/c compressor': 'ac compressor replacement',
+                'mass air flow': 'mass air flow sensor replacement',
+                'maf sensor': 'mass air flow sensor replacement',
+                'maf': 'mass air flow sensor replacement',
+                'catalytic converter': 'catalytic converter replacement',
+                'cat converter': 'catalytic converter replacement',
+                'exhaust manifold': 'exhaust manifold replacement',
+                'intake manifold': 'intake manifold gasket replacement',
+                'intake gasket': 'intake manifold gasket replacement'
+            };
+
+            // Vehicle make/model aliases
+            const vehicleAliases = {
+                'charger': 'dodge charger',
+                'challenger': 'dodge challenger',
+                'ram': 'ram 1500',
+                'ram 1500': 'ram 1500',
+                'f150': 'ford f-150',
+                'f-150': 'ford f-150',
+                'f 150': 'ford f-150',
+                'ford f150': 'ford f-150',
+                'mustang': 'ford mustang',
+                'explorer': 'ford explorer',
+                'civic': 'honda civic',
+                'accord': 'honda accord',
+                'cr-v': 'honda cr-v',
+                'crv': 'honda cr-v',
+                'camry': 'toyota camry',
+                'corolla': 'toyota corolla',
+                'rav4': 'toyota rav4',
+                'rav-4': 'toyota rav4',
+                'tacoma': 'toyota tacoma',
+                'tundra': 'toyota tundra',
+                'highlander': 'toyota highlander',
+                'silverado': 'chevrolet silverado',
+                'chevy silverado': 'chevrolet silverado',
+                'malibu': 'chevrolet malibu',
+                'chevy malibu': 'chevrolet malibu',
+                'equinox': 'chevrolet equinox',
+                'chevy equinox': 'chevrolet equinox',
+                'tahoe': 'chevrolet tahoe',
+                'chevy tahoe': 'chevrolet tahoe',
+                'altima': 'nissan altima',
+                'maxima': 'nissan maxima',
+                'rogue': 'nissan rogue',
+                'sentra': 'nissan sentra',
+                'frontier': 'nissan frontier',
+                'titan': 'nissan titan',
+                'elantra': 'hyundai elantra',
+                'sonata': 'hyundai sonata',
+                'tucson': 'hyundai tucson',
+                'santa fe': 'hyundai santa fe',
+                'kona': 'hyundai kona',
+                'optima': 'kia optima',
+                'k5': 'kia k5',
+                'sorento': 'kia sorento',
+                'sportage': 'kia sportage',
+                'forte': 'kia forte',
+                'wrangler': 'jeep wrangler',
+                'grand cherokee': 'jeep grand cherokee',
+                'cherokee': 'jeep cherokee',
+                'compass': 'jeep compass',
+                'cx-5': 'mazda cx-5',
+                'cx5': 'mazda cx-5',
+                'mazda3': 'mazda mazda3',
+                'mazda 3': 'mazda mazda3',
+                'mazda6': 'mazda mazda6',
+                'mazda 6': 'mazda mazda6',
+                'outback': 'subaru outback',
+                'forester': 'subaru forester',
+                'crosstrek': 'subaru crosstrek',
+                'impreza': 'subaru impreza',
+                'wrx': 'subaru wrx',
+                '3 series': 'bmw 3 series',
+                '5 series': 'bmw 5 series',
+                'x3': 'bmw x3',
+                'x5': 'bmw x5',
+                'c-class': 'mercedes c-class',
+                'e-class': 'mercedes e-class',
+                'a4': 'audi a4',
+                'a6': 'audi a6',
+                'q5': 'audi q5',
+                'model 3': 'tesla model 3',
+                'model y': 'tesla model y',
+                'model s': 'tesla model s',
+                'golf': 'volkswagen golf',
+                'jetta': 'volkswagen jetta',
+                'passat': 'volkswagen passat',
+                'tiguan': 'volkswagen tiguan',
+                'atlas': 'volkswagen atlas'
+            };
+
+            // Extract year (4-digit number)
+            const yearMatch = query.match(/\b(20[0-2][0-9])\b/);
+            let year = yearMatch ? yearMatch[1] : null;
+
+            // Extract repair type
+            let repairType = null;
+            for (const [key, value] of Object.entries(repairMappings)) {
+                if (query.includes(key)) {
+                    repairType = value;
+                    break;
+                }
+            }
+
+            // Extract vehicle
+            let vehicle = null;
+            for (const [key, value] of Object.entries(vehicleAliases)) {
+                if (query.includes(key)) {
+                    vehicle = value;
+                    break;
+                }
+            }
+
+            // If we found components, search for matching procedure
+            if (repairType && year && vehicle) {
+                const searchKey = `${repairType}|${year}|${vehicle}`;
+                if (procedures[searchKey]) {
+                    return procedures[searchKey];
+                }
+            }
+
+            // Fuzzy search - find best match
+            let bestMatch = null;
+            let bestScore = 0;
+
+            for (const [key, proc] of Object.entries(procedures)) {
+                let score = 0;
+                const keyLower = key.toLowerCase();
+                const queryWords = query.split(/\s+/);
+
+                // Score based on matching words
+                queryWords.forEach(word => {
+                    if (word.length > 2) {
+                        if (keyLower.includes(word)) score += 2;
+                        if (proc.repair.toLowerCase().includes(word)) score += 3;
+                        if (proc.make.toLowerCase().includes(word)) score += 2;
+                        if (proc.model.toLowerCase().includes(word)) score += 2;
+                        if (proc.year.toString() === word) score += 3;
+                    }
+                });
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMatch = proc;
+                }
+            }
+
+            return bestScore >= 4 ? bestMatch : null;
+        }
+
         const procedures = {
             "head gasket replacement|2021|dodge charger": {
                 repair: "Head Gasket Replacement",
@@ -806,47 +1044,94 @@
             }
         };
 
+        // Natural language search function
+        function naturalSearch() {
+            const query = document.getElementById('naturalInput').value.trim();
+            if (!query) {
+                alert('Please enter a repair query (e.g., "replace head gasket on a 2021 dodge charger")');
+                return;
+            }
+
+            const procedure = smartSearch(query);
+            const resultsSection = document.getElementById('resultsSection');
+            const resultContent = document.getElementById('resultContent');
+
+            if (procedure) {
+                resultContent.innerHTML = generateProcedureHTML(procedure);
+                resultsSection.classList.add('active');
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                resultContent.innerHTML = generateNoResultsHTML(query);
+                resultsSection.classList.add('active');
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
         function searchProcedure() {
             const repair = document.getElementById('repairInput').value.toLowerCase().trim();
             const year = document.getElementById('yearInput').value.toLowerCase().trim();
             const vehicle = document.getElementById('vehicleInput').value.toLowerCase().trim();
-            
+
             if (!repair || !year || !vehicle) {
                 alert('Please enter all fields: Repair Type, Year, and Make/Model');
                 return;
             }
-            
+
             performSearch(repair, year, vehicle);
         }
-        
+
         function quickSearch(repair, year, vehicle) {
             document.getElementById('repairInput').value = repair;
             document.getElementById('yearInput').value = year;
             document.getElementById('vehicleInput').value = vehicle;
+            document.getElementById('naturalInput').value = `${repair} ${year} ${vehicle}`;
             performSearch(repair.toLowerCase(), year.toLowerCase(), vehicle.toLowerCase());
         }
-        
+
         function performSearch(repair, year, vehicle) {
             const searchKey = `${repair}|${year}|${vehicle}`;
             const procedure = procedures[searchKey];
             const resultsSection = document.getElementById('resultsSection');
             const resultContent = document.getElementById('resultContent');
-            
+
             if (procedure) {
                 resultContent.innerHTML = generateProcedureHTML(procedure);
                 resultsSection.classList.add('active');
-                window.scrollTo(0, 0);
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
             } else {
-                resultContent.innerHTML = `
-                    <div class="no-results">
-                        <h3>Procedure Not Found</h3>
-                        <p>The procedure for "${repair.toUpperCase()}" on a ${year} ${vehicle} is not in the database yet.</p>
-                        <p style="margin-top: 15px; font-size: 12px; color: #999;">Available procedures: Head Gasket (2021 Dodge Charger), Water Pump (2020 Ford F-150), Spark Plugs (2022 Honda Civic), Alternator (2023 Toyota Camry)</p>
-                    </div>
-                `;
-                resultsSection.classList.add('active');
-                window.scrollTo(0, 0);
+                // Try smart search as fallback
+                const combinedQuery = `${repair} ${year} ${vehicle}`;
+                const smartResult = smartSearch(combinedQuery);
+                if (smartResult) {
+                    resultContent.innerHTML = generateProcedureHTML(smartResult);
+                    resultsSection.classList.add('active');
+                    resultsSection.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    resultContent.innerHTML = generateNoResultsHTML(combinedQuery);
+                    resultsSection.classList.add('active');
+                    resultsSection.scrollIntoView({ behavior: 'smooth' });
+                }
             }
+        }
+
+        function generateNoResultsHTML(query) {
+            // Get list of all available procedures
+            const availableProcedures = Object.values(procedures).map(p =>
+                `${p.repair} - ${p.year} ${p.make} ${p.model}`
+            );
+
+            return `
+                <div class="no-results">
+                    <h3>Procedure Not Found</h3>
+                    <p>No procedure found for: "${query}"</p>
+                    <div style="margin-top: 20px; text-align: left;">
+                        <strong>Available Procedures:</strong>
+                        <ul style="margin-top: 10px; list-style: none;">
+                            ${availableProcedures.map(p => `<li style="padding: 5px 0; border-bottom: 1px solid #eee;">• ${p}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
         }
         
         function generateProcedureHTML(proc) {
@@ -939,7 +1224,12 @@
         // Allow Enter key to search
         document.addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
-                searchProcedure();
+                // Check if natural search input is focused
+                if (document.activeElement.id === 'naturalInput') {
+                    naturalSearch();
+                } else {
+                    searchProcedure();
+                }
             }
         });
     </script>
